@@ -243,7 +243,10 @@
     var yearbutton = svg.append("g")
         .on("click", function(d) {setTimePeriod(year);});
 
-    yearbutton.append("rect")
+    var threemonthbutton = svg.append("g")
+        .on("click", function(d) {setTimePeriod(3*month);});
+
+    threemonthbutton.append("rect")
     .attr("class", "button")
     .attr("height", 50)
     .attr("width", 100)
@@ -251,8 +254,23 @@
     .attr("ry", 5)
     .attr("transform", "translate(" + (9*margin.buttons+5) + "," + buttonheight + ")")
 
-    yearbutton.append("text")
+    threemonthbutton.append("text")
       .attr("x", 9 * margin.buttons + 10)
+      .attr("y", buttonheight + 25)
+      .attr("dy", ".35em")
+      .attr("font-size", "20px")
+      .text(function() {return "3 Months";})
+
+    yearbutton.append("rect")
+    .attr("class", "button")
+    .attr("height", 50)
+    .attr("width", 100)
+    .attr("rx", 5)
+    .attr("ry", 5)
+    .attr("transform", "translate(" + (11*margin.buttons+5) + "," + buttonheight + ")")
+
+    yearbutton.append("text")
+      .attr("x", 11 * margin.buttons + 10)
       .attr("y", buttonheight + 25)
       .attr("dy", ".35em")
       .attr("font-size", "20px")
@@ -267,10 +285,10 @@
     .attr("width", 100)
     .attr("rx", 5)
     .attr("ry", 5)
-    .attr("transform", "translate(" + (11*margin.buttons+5) + "," + buttonheight + ")")
+    .attr("transform", "translate(" + (13*margin.buttons+5) + "," + buttonheight + ")")
 
     threeyearbutton.append("text")
-      .attr("x", 11 * margin.buttons + 10)
+      .attr("x", 13 * margin.buttons + 10)
       .attr("y", buttonheight + 25)
       .attr("dy", ".35em")
       .attr("font-size", "20px")

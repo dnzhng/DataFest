@@ -56,6 +56,7 @@
     var halfday = 43200000,
     day = 86400000,
     week = 604800000,
+    month = 2629740000,
     year = 31560000000,
     threeyears = 94670000000;
 
@@ -159,6 +160,24 @@
       .attr("font-size", "20px")
       .text(function() {return "1 Week";})
 
+    var monthbutton = svg.append("g")
+        .on("click", function(d) {setTimePeriod(month);});
+
+    monthbutton.append("rect")
+    .attr("class", "button")
+    .attr("height", 50)
+    .attr("width", 100)
+    .attr("rx", 5)
+    .attr("ry", 5)
+    .attr("transform", "translate(" + (7*margin.buttons+5) + "," + buttonheight + ")")
+
+    monthbutton.append("text")
+      .attr("x", 7 * margin.buttons + 10)
+      .attr("y", buttonheight + 25)
+      .attr("dy", ".35em")
+      .attr("font-size", "20px")
+      .text(function() {return "1 Month";})
+
     var yearbutton = svg.append("g")
         .on("click", function(d) {setTimePeriod(year);});
 
@@ -168,10 +187,10 @@
     .attr("width", 100)
     .attr("rx", 5)
     .attr("ry", 5)
-    .attr("transform", "translate(" + (7*margin.buttons+5) + "," + buttonheight + ")")
+    .attr("transform", "translate(" + (9*margin.buttons+5) + "," + buttonheight + ")")
 
     yearbutton.append("text")
-      .attr("x", 7 * margin.buttons + 10)
+      .attr("x", 9 * margin.buttons + 10)
       .attr("y", buttonheight + 25)
       .attr("dy", ".35em")
       .attr("font-size", "20px")
@@ -186,10 +205,10 @@
     .attr("width", 100)
     .attr("rx", 5)
     .attr("ry", 5)
-    .attr("transform", "translate(" + (9*margin.buttons+5) + "," + buttonheight + ")")
+    .attr("transform", "translate(" + (11*margin.buttons+5) + "," + buttonheight + ")")
 
     threeyearbutton.append("text")
-      .attr("x", 9 * margin.buttons + 10)
+      .attr("x", 11 * margin.buttons + 10)
       .attr("y", buttonheight + 25)
       .attr("dy", ".35em")
       .attr("font-size", "20px")
@@ -197,7 +216,7 @@
 
 
 
-    d3.csv("BLDG002_less.csv", function(error, data) {
+    d3.csv("BLDG001_less.csv", function(error, data) {
       x.domain(d3.extent(data.map(function(d) { 
         data.forEach(function(d) {
           d.date = parseDate(d['IntervalStart']);

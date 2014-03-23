@@ -30,6 +30,19 @@
     fill-opacity: .125;
   }
 
+  .zone {
+    stroke: orange;
+    fill: none;
+  }
+
+  .duct {
+    stroke: gray;
+    fill: none;
+    opacity: .25;
+
+
+  }
+
 </style>
 <body>
   <script src="http://d3js.org/d3.v3.min.js"></script>
@@ -64,7 +77,8 @@
     .x(x2)
     .on("brush", brushed)
     .on("brushend", brushed);
-    var area = d3.svg.area()
+
+    var temparea = d3.svg.area()
     .interpolate("monotone")
     .x(function(d) { 
         d.date = parseDate(d['IntervalStart']);
@@ -76,7 +90,31 @@
         return y(d.kWH); 
       });
 
-    var area2 = d3.svg.area()
+    var zonearea = d3.svg.area()
+    .interpolate("monotone")
+    .x(function(d) {
+        d.date = parseDate(d['IntervalStart']);
+        return x(d.date);
+    })
+    .y0(height)
+    .y1(function(d) {
+        d.zone = +d['HVAC.1.Zone.Temp'];
+        return y(d.zone);
+    });
+
+    var ductarea = d3.svg.area()
+    .interpolate("monotone")
+    .x(function(d) {
+        d.date = parseDate(d['IntervalStart']);
+        return x(d.date);
+    })
+    .y0(height)
+    .y1(function(d) {
+        d.duct = +d['HVAC.1.Duct.Temp'];
+        return y(d.duct);
+    });
+
+    var temparea2 = d3.svg.area()
     .interpolate("monotone")
     .x(function(d) { 
         d.date = parseDate(d['IntervalStart']);
@@ -84,9 +122,33 @@
       })
     .y0(height2)
     .y1(function(d) { 
-        d.kWH = +d['Temperature']
+        d.kWH = +d['Temperature'];
         return y2(d.kWH); 
       });
+
+    var zonearea2 = d3.svg.area()
+    .interpolate("monotone")
+    .x(function(d) {
+        d.date = parseDate(d['IntervalStart']);
+        return x2(d.date);
+    })
+    .y0(height2)
+    .y1(function(d) {
+        d.zone = +d['HVAC.1.Zone.Temp'];
+        return y2(d.zone);
+    });
+
+    var ductarea2 = d3.svg.area()
+    .interpolate("monotone")
+    .x(function(d) {
+        d.date = parseDate(d['IntervalStart']);
+        return x2(d.date);
+    })
+    .y0(height2)
+    .y1(function(d) {
+        d.duct = +d['HVAC.1.Duct.Temp'];
+        return y2(d.duct);
+    });
 
     var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -215,8 +277,53 @@
       .text(function() {return "3 Years";})
 
 
+    var legend = svg
+    .append('g')
+    .attr('class', 'legend');
 
-    d3.csv("BLDG001_less.csv", function(error, data) {
+    legend.append('rect')
+    .attr("class", "tlegend")
+    .attr('x', width - 80)
+    .attr('y', height-100)
+    .attr('width', 10)
+    .attr('height', 10)
+    .style('fill', "steelblue");
+
+    legend.append('text')
+    .attr('x', width - 65)
+    .attr('y', height - 100 + 9)
+    .text("Temperature");
+
+    legend.append('rect')
+    .attr("class", "zlegend")
+    .attr('x', width - 80)
+    .attr('y', height - 85)
+    .attr('width', 10)
+    .attr('height', 10)
+    .style('fill', "orange");
+
+    legend.append('text')
+    .attr('x', width - 65)
+    .attr('y', height - 100 + 24)
+    .text("HVAC Zone Temp");
+
+    legend.append('rect')
+    .attr("class", "zlegend")
+    .attr('x', width - 80)
+    .attr('y', height - 70)
+    .attr('width', 10)
+    .attr('height', 10)
+    .style('fill', "gray")
+    .style("opacity", .125);
+
+    legend.append('text')
+    .attr('x', width - 65)
+    .attr('y', height - 100 + 39)
+    .text("HVAC Duct Temp");
+
+
+
+    d3.csv("BLDG002_less.csv", function(error, data) {
       x.domain(d3.extent(data.map(function(d) { 
         data.forEach(function(d) {
           d.date = parseDate(d['IntervalStart']);
@@ -236,7 +343,19 @@
       focus.append("path")
       .datum(data)
       .attr("class", "area")
-      .attr("d", area);
+      .attr("d", temparea);
+
+      focus.append("path")
+      .datum(data)
+      .attr("class", "area")
+      .attr("class", "zone")
+      .attr("d", zonearea);
+
+      focus.append("path")
+      .datum(data)
+      .attr("class", "area")
+      .attr("class", "duct")
+      .attr("d", ductarea);
 
       focus.append("g")
       .attr("class", "x axis")
@@ -250,7 +369,19 @@
       context.append("path")
       .datum(data)
       .attr("class", "area")
-      .attr("d", area2);
+      .attr("d", temparea2);
+
+      context.append("path")
+      .datum(data)
+      .attr("class", "area")
+      .attr("class", "zone")
+      .attr("d", zonearea2);
+
+      context.append("path")
+      .datum(data)
+      .attr("class", "area")
+      .attr("class", "duct")
+      .attr("d", ductarea2);
 
       context.append("g")
       .attr("class", "x axis")
@@ -267,20 +398,23 @@
 
     function brushed() {
       x.domain(brush.empty() ? x2.domain() : brush.extent());
-      focus.select(".area").attr("d", area);
+      focus.select(".area").attr("d", temparea);
+      focus.select(".zone").attr("d", zonearea);
+      focus.select(".duct").attr("d", ductarea);
       focus.select(".x.axis").call(xAxis);
     }
 
     function setTimePeriod(milliseconds) {
       var ms = milliseconds;
       var time = Math.abs(x.domain()[1] - ms);
-      var date = new Date(time);
       brush.extent([time, x.domain()[1]]);
       d3.select('.brush').transition()
         .call(brush.extent([time, x.domain()[1]]))
         .call(brush.event);
       x.domain(brush.extent());
-      focus.select(".area").attr("d", area);
+      focus.select(".area").attr("d", temparea);
+      focus.select(".zone").attr("d", zonearea);
+      focus.select(".duct").attr("d", ductarea);
       focus.select(".x.axis").call(xAxis);      
     }
 

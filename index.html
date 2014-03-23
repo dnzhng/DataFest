@@ -35,11 +35,12 @@
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script>
 
-    var margin = {top: 10, right: 10, bottom: 100, left: 40},
+    var margin = {top: 10, right: 10, bottom: 100, left: 40, buttons: 60},
     margin2 = {top: 430, right: 10, bottom: 20, left: 40},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom,
     height2 = 500 - margin2.top - margin2.bottom;
+    buttonheight = margin2.top + margin.top + 70
 
     var parseDate = d3.time.format("%x %H:%M").parse;
 
@@ -52,10 +53,16 @@
     xAxis2 = d3.svg.axis().scale(x2).orient("bottom"),
     yAxis = d3.svg.axis().scale(y).orient("left");
 
+    var halfday = 43200000,
+    day = 86400000,
+    week = 604800000,
+    year = 31560000000,
+    threeyears = 94670000000;
+
     var brush = d3.svg.brush()
     .x(x2)
-    .on("brush", brushed);
-
+    .on("brush", brushed)
+    .on("brushend", brushed);
     var area = d3.svg.area()
     .interpolate("monotone")
     .x(function(d) { 
@@ -82,7 +89,7 @@
 
     var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom);
+    .attr("height", height + margin.top + margin.bottom + 100);
 
     svg.append("defs").append("clipPath")
     .attr("id", "clip")
@@ -98,26 +105,53 @@
     .attr("class", "context")
     .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-    var button = svg.append("rect")
+    var halfdaybutton = svg.append("g")
+          .on("click", function(d) {setHalfDay();});
+
+
+    halfdaybutton.append("rect")
     .attr("class", "button")
     .attr("height", 50)
-    .attr("width", 50)
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    .on("click", function(d) {setHalfDay();});
+    .attr("width", 100)
+    .attr("rx", 5)
+    .attr("ry", 5)
+    .attr("transform", "translate(" + margin.buttons + "," + buttonheight + ")")
+
+    halfdaybutton.append("text")
+      .attr("x", margin.buttons + 5)
+      .attr("y", buttonheight + 25)
+      .attr("dy", ".35em")
+      .text(function() {return "Set 12 Hour Interval";})
+
+      var daybutton = svg.append("g")
+          .on("click", function(d) {setTimePeriod(day);});
+
+
+    daybutton.append("rect")
+    .attr("class", "button")
+    .attr("height", 50)
+    .attr("width", 100)
+    .attr("rx", 5)
+    .attr("ry", 5)
+    .attr("transform", "translate(" + (3*margin.buttons+5) + "," + buttonheight + ")")
+
+    daybutton.append("text")
+      .attr("x", 3 * margin.buttons + 10)
+      .attr("y", buttonheight + 25)
+      .attr("dy", ".35em")
+      .text(function() {return "Set 24 Hour Interval";})
 
     d3.csv("BLDG001.csv", function(error, data) {
       x.domain(d3.extent(data.map(function(d) { 
         data.forEach(function(d) {
           d.date = parseDate(d['BLDG001.IntervalStart']);
         })
-        console.log(d.date);
         return d.date; 
       })));
       y.domain([0, d3.max(data.map(function(d) { 
         data.forEach(function(d) {
           d.kWH = +d['BLDG001.HVAC.2']
         })
-        console.log(d.kWH);
         return d.kWH; 
       }))]);
       x2.domain(x.domain());
@@ -163,7 +197,55 @@
     }
 
     function setHalfDay() {
-      x.domain(brush.extent([x2.domain()-12, x2.domain()]));
+      var twelvehrms = 43200000;
+      var twelveHours = Math.abs(x.domain()[1] - twelvehrms);
+      var date = new Date(twelveHours);
+      brush.extent([twelveHours, x.domain()[1]]);
+      d3.select('.brush').transition()
+        .call(brush.extent([twelveHours, x.domain()[1]]))
+        .call(brush.event);
+      x.domain(brush.extent());
+      focus.select(".area").attr("d", area);
+      focus.select(".x.axis").call(xAxis);
+    }
+
+    function setSingleDay() {
+      var dayms = 86400000;
+      var day = Math.abs(x.domain()[1] - dayms);
+      var date = new Date(day);
+      brush.extent([day, x.domain()[1]]);
+      d3.select('.brush').transition()
+        .call(brush.extent([day, x.domain()[1]]))
+        .call(brush.event);
+      x.domain(brush.extent());
+      focus.select(".area").attr("d", area);
+      focus.select(".x.axis").call(xAxis);
+    }
+
+    function setWeek() {
+      var dayms = 86400000;
+      var day = Math.abs(x.domain()[1] - dayms);
+      var date = new Date(day);
+      brush.extent([day, x.domain()[1]]);
+      d3.select('.brush').transition()
+        .call(brush.extent([day, x.domain()[1]]))
+        .call(brush.event);
+      x.domain(brush.extent());
+      focus.select(".area").attr("d", area);
+      focus.select(".x.axis").call(xAxis);
+    }
+
+    function setTimePeriod(milliseconds) {
+      var ms = milliseconds;
+      var time = Math.abs(x.domain()[1] - ms);
+      var date = new Date(time);
+      brush.extent([time, x.domain()[1]]);
+      d3.select('.brush').transition()
+        .call(brush.extent([time, x.domain()[1]]))
+        .call(brush.event);
+      x.domain(brush.extent());
+      focus.select(".area").attr("d", area);
+      focus.select(".x.axis").call(xAxis);      
     }
 
 
